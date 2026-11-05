@@ -9,14 +9,14 @@
 
 ## O que tem
 
-- Interface em português, tema escuro e ícone próprio.
+- Interface em português e ícone próprio.
 - Teclado, mouse ou ambos: escolha antes de bloquear.
 - Contagem de 0, 3 ou 5 segundos, cancelável com Esc.
 - Desbloqueio automático após 30 segundos, 1, 5 ou 15 minutos; opção sem limite.
 - Atalho personalizável, padrão `Ctrl + Q`.
 - Emergência fixa: `Ctrl + Alt + F12` libera os dois dispositivos.
 - Preferências em `%APPDATA%\InputLock\settings.json`.
-- Sem dependências externas em execução, contas, telemetria ou registro de teclas.
+- Sem contas, telemetria ou registro de teclas.
 
 ## Usar
 
@@ -31,15 +31,17 @@ O app atua na sessão atual do Windows 10/11 x64. Não é um bloqueio de seguran
 
 ## Rodar pelo código
 
-Python 3.11 ou superior com Tkinter. No Windows, o instalador oficial do Python inclui Tkinter por padrão.
+Python 3.11 ou superior com Tkinter. A interface usa CustomTkinter e Pillow, incluídos no executável. No Windows, o instalador oficial do Python inclui Tkinter por padrão.
 
 ```powershell
+py -3 -m pip install -r requirements.txt
 py -3 main.py
 ```
 
 Prévia visual, sem bloquear dispositivos (também funciona no Linux com Tkinter):
 
 ```sh
+python3 -m pip install -r requirements.txt
 python3 main.py --preview
 ```
 

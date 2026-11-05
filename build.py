@@ -15,7 +15,7 @@ def main():
     subprocess.run([
         sys.executable, "-m", "PyInstaller", "--name=InputLock", "--onefile", "--windowed",
         "--clean", "--noconfirm", "--icon=assets/icon.ico", "--add-data=assets:assets",
-        "--add-data=LICENSE:.", "--add-data=NOTICE:.", "--version-file=version_info.txt", "main.py",
+        "--collect-all=customtkinter", "--add-data=LICENSE:.", "--add-data=NOTICE:.", "--version-file=version_info.txt", "main.py",
     ], cwd=ROOT, check=True)
     print("Pronto: dist/InputLock.exe")
 

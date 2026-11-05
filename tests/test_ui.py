@@ -51,7 +51,8 @@ class InterfaceTests(unittest.TestCase):
         self.assertFalse(any(self.app.backend.snapshot()[:2]))
 
     def test_keyboard_only_and_shortcut_unlock(self):
-        self.app.toggle(self.app.mouse)
+        self.app.mouse.switch.invoke()
+        self.assertFalse(self.app.mouse.selected)
         self.app.start()
         self.assertEqual(self.app.backend.snapshot()[:2], (True, False))
         self.app.backend.key_event(0xA3, True)
@@ -68,7 +69,7 @@ class InterfaceTests(unittest.TestCase):
     def test_selection_frozen_during_countdown(self):
         self.app.delay.set("3 segundos")
         self.app.start()
-        self.app.toggle(self.app.mouse)
+        self.app.mouse.switch.invoke()
         self.assertTrue(self.app.mouse.selected)
 
     def test_about_displays_credits(self):
