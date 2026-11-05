@@ -1,9 +1,9 @@
-Atualização visual do InputLock para Windows 10/11 x64.
+InputLock v1.0.2 — controles diretos.
 
-- Interface clara e mais compacta.
-- Switches para teclado e mouse.
-- Controles arredondados, novos ícones e tipografia ajustada.
-- Status de bloqueio e temporizador na mesma linha.
+- Três botões: teclado, mouse e ambos. Um clique bloqueia ou libera.
+- Timer, contagem regressiva e seleção prévia removidos.
+- Janela reduzida e status separado por dispositivo.
+- Atalho personalizável e emergência `Ctrl + Alt + F12`.
 
 ### Downloads
 
@@ -12,6 +12,6 @@ Atualização visual do InputLock para Windows 10/11 x64.
 - **InputLock-Source.zip**: código-fonte desta versão.
 - **SHA256SUMS.txt**: checksums dos arquivos.
 
-Não precisa instalar Python. `Ctrl + Alt + F12` libera os dispositivos.
+Windows 10/11 x64. Não precisa instalar Python.
 
 made by [rafaelolv](https://github.com/rafelolv). Baseado no [Keylock, de Axorax](https://github.com/Axorax/keylock). Licença AGPL-3.0.

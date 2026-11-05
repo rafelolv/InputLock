@@ -7,27 +7,19 @@
 
 ![Interface do InputLock](thumbnail.png)
 
-## O que tem
-
-- Interface em português e ícone próprio.
-- Teclado, mouse ou ambos: escolha antes de bloquear.
-- Contagem de 0, 3 ou 5 segundos, cancelável com Esc.
-- Desbloqueio automático após 30 segundos, 1, 5 ou 15 minutos; opção sem limite.
-- Atalho personalizável, padrão `Ctrl + Q`.
-- Emergência fixa: `Ctrl + Alt + F12` libera os dois dispositivos.
-- Preferências em `%APPDATA%\InputLock\settings.json`.
-- Sem contas, telemetria ou registro de teclas.
-
 ## Usar
 
-1. Baixe `InputLock.exe` na release e abra. Não precisa instalar Python.
-2. Selecione os dispositivos e escolha a duração.
-3. Confira o atalho e clique em **Bloquear dispositivos**.
-4. Para liberar, use o atalho ou aguarde o temporizador. Se o mouse estiver disponível, também há **Desbloquear agora**.
+Baixe `InputLock.exe` na release e abra. Não precisa instalar Python.
 
-`InputLock-Setup.exe` é o instalador opcional por usuário, sem exigir administrador.
+- **Teclado**: bloqueia ou libera o teclado na hora.
+- **Mouse**: bloqueia ou libera o mouse na hora.
+- **Bloquear ambos**: bloqueia os dois. Quando ambos estão bloqueados, o botão libera os dois.
 
-O app atua na sessão atual do Windows 10/11 x64. Não é um bloqueio de segurança da sessão: para isso, use `Win + L`. `Ctrl + Alt + Del` permanece disponível. Aplicativos elevados e áreas protegidas do Windows podem não ser bloqueados. Fechar o app libera os dispositivos. O temporizador funciona numa thread independente da interface.
+O atalho padrão `Ctrl + Q` libera tudo, inclusive com o mouse bloqueado. Você pode alterar o atalho no campo **Desbloquear**. A emergência `Ctrl + Alt + F12` permanece fixa.
+
+Preferências em `%APPDATA%\InputLock\settings.json`. Sem contas, telemetria ou registro de teclas. `InputLock-Setup.exe` é o instalador opcional por usuário.
+
+O app atua na sessão atual do Windows 10/11 x64. Para bloquear a sessão, use `Win + L`. `Ctrl + Alt + Del` permanece disponível. Aplicativos elevados e áreas protegidas do Windows podem não ser bloqueados. Fechar o app libera os dispositivos.
 
 ## Rodar pelo código
 
@@ -78,9 +70,9 @@ python3 -m unittest discover -s tests -v
 python3 main.py --smoke-test
 ```
 
-Testes cobrem atalhos, modificadores dos dois lados, desbloqueio de emergência, temporizador e preferências inválidas. No Windows, também iniciam e encerram os hooks sem bloquear entradas. O smoke test abre uma prévia e encerra automaticamente. A pipeline também executa o smoke test do `.exe` empacotado.
+Testes cobrem os três botões, atalhos, modificadores dos dois lados, desbloqueio de emergência e preferências inválidas. No Windows, também iniciam e encerram os hooks sem bloquear entradas. O smoke test abre uma prévia e encerra automaticamente. A pipeline também executa o smoke test do `.exe` empacotado.
 
-Antes da primeira release, confira em um Windows real: teclado isolado, mouse isolado, ambos, atalhos personalizados, emergência e temporizador. Os testes automatizados não simulam a supressão de entradas reais.
+Antes da primeira release, confira em um Windows real: teclado isolado, mouse isolado, ambos, atalhos personalizados e emergência. Os testes automatizados não simulam a supressão de entradas reais.
 
 ## Créditos e licença
 

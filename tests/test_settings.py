@@ -17,7 +17,7 @@ class SettingsTests(unittest.TestCase):
         self.assertFalse(self.path.exists())
 
     def test_preferences_round_trip(self):
-        expected = {"shortcut": "alt+2", "duration": 300, "delay": 5}
+        expected = {"shortcut": "alt+2"}
         save_config(expected, self.path)
         self.assertEqual(load_config(self.path), expected)
         self.assertFalse(self.path.with_suffix(".tmp").exists())
@@ -28,14 +28,14 @@ class SettingsTests(unittest.TestCase):
             self.path.write_text(content)
             self.assertEqual(load_config(self.path), DEFAULTS)
 
-    def test_invalid_types_do_not_enter_config(self):
+    def test_legacy_timers_are_ignored(self):
         self.path.parent.mkdir(parents=True)
-        self.path.write_text(json.dumps({"duration": True, "delay": "5"}))
-        self.assertEqual(load_config(self.path), DEFAULTS)
+        self.path.write_text(json.dumps({"shortcut": "alt+2", "duration": 300, "delay": 5}))
+        self.assertEqual(load_config(self.path), {"shortcut": "alt+2"})
 
     def test_invalid_save_preserves_existing_preferences(self):
         save_config(DEFAULTS, self.path)
-        for changes in ({"shortcut": "q"}, {"delay": 99}, {"duration": -1}):
+        for changes in ({"shortcut": "q"}, {"shortcut": "ctrl+"}):
             with self.assertRaises(ValueError):
                 save_config({**DEFAULTS, **changes}, self.path)
             self.assertEqual(load_config(self.path), DEFAULTS)

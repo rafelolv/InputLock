@@ -3,7 +3,6 @@
 import ctypes
 import os
 import threading
-import time
 from ctypes import wintypes
 
 EMERGENCY_SHORTCUT = "ctrl+alt+f12"
@@ -41,14 +40,13 @@ class LockState:
         self._mutex = threading.RLock()
         self.keyboard_locked = False
         self.mouse_locked = False
-        self.deadline = None
         self.shortcut = parse_shortcut("ctrl+q")
         self.emergency = parse_shortcut(EMERGENCY_SHORTCUT)
         self.pressed = set()
         self.physical_keys = set()
         self.swallowed = set()
 
-    def lock(self, keyboard, mouse, shortcut="ctrl+q", seconds=0):
+    def lock(self, keyboard, mouse, shortcut="ctrl+q"):
         keys = parse_shortcut(shortcut)
         with self._mutex:
             self.shortcut = keys
@@ -56,24 +54,16 @@ class LockState:
             self.physical_keys.clear()
             self.keyboard_locked = bool(keyboard)
             self.mouse_locked = bool(mouse)
-            self.deadline = time.monotonic() + seconds if seconds else None
 
     def unlock(self):
         with self._mutex:
             self.keyboard_locked = self.mouse_locked = False
-            self.deadline = None
             self.pressed.clear()
             self.physical_keys.clear()
 
     def snapshot(self):
         with self._mutex:
-            remaining = max(0, self.deadline - time.monotonic()) if self.deadline else None
-            return self.keyboard_locked, self.mouse_locked, remaining
-
-    def expire(self):
-        with self._mutex:
-            if self.deadline is not None and time.monotonic() >= self.deadline:
-                self.unlock()
+            return self.keyboard_locked, self.mouse_locked
 
     def key_event(self, code, down):
         """Return True to suppress. Consume unlock key-up as well as key-down."""
@@ -114,12 +104,6 @@ class WindowsInputLock(LockState):
             raise OSError("O Windows não respondeu ao iniciar o bloqueio.")
         if self._error:
             raise OSError(f"Não foi possível iniciar o bloqueio: {self._error}")
-        self._timer = threading.Thread(target=self._watch, daemon=True, name="InputLock timer")
-        self._timer.start()
-
-    def _watch(self):
-        while not self._stop.wait(0.1):
-            self.expire()
 
     def lock(self, *args, **kwargs):
         if self._error or not self._thread.is_alive():

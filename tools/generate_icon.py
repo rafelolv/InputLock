@@ -29,13 +29,3 @@ for kind in ("keyboard", "mouse"):
         pen.line((96, 20, 96, 81), fill=color, width=8)
         pen.line((52, 84, 140, 84), fill=color, width=8)
     icon.resize((48, 48), Image.Resampling.LANCZOS).save(ROOT / f"assets/{kind}.png")
-
-for selected in (False, True):
-    switch = Image.new("RGBA", (160, 96))
-    pen = ImageDraw.Draw(switch)
-    pen.rounded_rectangle((0, 0, 159, 95), radius=48,
-                          fill="#20242b" if selected else "#d9dce1")
-    left = 76 if selected else 12
-    pen.ellipse((left, 12, left + 71, 83), fill="#ffffff")
-    switch.resize((80, 48), Image.Resampling.LANCZOS).save(
-        ROOT / f"assets/switch_{'on' if selected else 'off'}.png")

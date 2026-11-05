@@ -1,4 +1,4 @@
-"""Exercise UI transitions in preview mode, without suppressing real input."""
+"""Exercise the same one-click controls users see; never suppress real input."""
 import unittest
 from unittest.mock import patch
 
@@ -17,13 +17,12 @@ class InterfaceTests(unittest.TestCase):
             self.skipTest(f"Display unavailable: {error}")
         self.addCleanup(self.cleanup)
         import main
-        self.main = main
-        self.preferences = patch("main.load_config", return_value={"shortcut": "ctrl+q", "duration": 60, "delay": 0})
-        self.saving = patch("main.save_config")
+        self.preferences = patch("main.load_config", return_value={"shortcut": "ctrl+q"})
         self.preferences.start()
-        self.saving.start()
         self.addCleanup(self.preferences.stop)
-        self.addCleanup(self.saving.stop)
+        saving = patch("main.save_config")
+        self.saving = saving.start()
+        self.addCleanup(saving.stop)
         self.app = main.InputLockApp(self.root, preview=True)
         self.root.update()
 
@@ -33,44 +32,56 @@ class InterfaceTests(unittest.TestCase):
         else:
             self.root.destroy()
 
-    def test_lock_both_and_unlock_button(self):
-        self.app.start()
-        self.assertEqual(self.app.backend.snapshot()[:2], (True, True))
-        self.app._poll()
-        self.assertEqual(self.app.action.cget("text"), "Desbloquear agora")
-        self.assertEqual(str(self.app.shortcut_entry.cget("state")), "disabled")
-        self.app.start()
-        self.assertEqual(self.app.backend.snapshot()[:2], (False, False))
+    def test_keyboard_button_locks_and_unlocks_immediately(self):
+        self.app.keyboard_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (True, False))
+        self.assertEqual(self.app.keyboard_status.cget("text"), "●  Teclado bloqueado")
+        self.app.keyboard_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (False, False))
 
-    def test_cancel_countdown_never_locks(self):
-        self.app.delay.set("3 segundos")
-        self.app.start()
-        self.assertIsNotNone(self.app.pending)
-        self.app.cancel_countdown()
-        self.assertIsNone(self.app.pending)
-        self.assertFalse(any(self.app.backend.snapshot()[:2]))
-
-    def test_keyboard_only_and_shortcut_unlock(self):
-        self.app.mouse.switch.invoke()
-        self.assertFalse(self.app.mouse.selected)
-        self.app.start()
-        self.assertEqual(self.app.backend.snapshot()[:2], (True, False))
+    def test_mouse_button_locks_only_mouse(self):
+        self.app.mouse_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (False, True))
         self.app.backend.key_event(0xA3, True)
         self.app.backend.key_event(ord("Q"), True)
-        self.assertFalse(any(self.app.backend.snapshot()[:2]))
+        self.app._refresh()
+        self.assertEqual(self.app.backend.snapshot(), (False, False))
+        self.assertEqual(self.app.mouse_status.cget("text"), "●  Mouse livre")
 
-    def test_empty_selection_does_not_start_backend(self):
-        self.app.toggle(self.app.mouse)
-        self.app.toggle(self.app.keyboard)
-        self.app.start()
+    def test_both_button_preserves_already_locked_keyboard(self):
+        self.app.keyboard_button.invoke()
+        self.app.both_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (True, True))
+        self.assertEqual(self.app.both_button.cget("text"), "Desbloquear ambos")
+        self.app.both_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (False, False))
+
+    def test_devices_toggle_independently(self):
+        self.app.both_button.invoke()
+        self.app.keyboard_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (False, True))
+        self.app.mouse_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (False, False))
+
+    def test_shortcut_editing_disabled_only_while_locked(self):
+        self.app.keyboard_button.invoke()
+        self.assertEqual(self.app.shortcut_entry.cget("state"), "disabled")
+        self.app.keyboard_button.invoke()
+        self.assertEqual(self.app.shortcut_entry.cget("state"), "normal")
+
+    def test_unlock_does_not_require_writable_preferences(self):
+        self.app.keyboard_button.invoke()
+        self.saving.side_effect = OSError("read-only")
+        self.app.keyboard_button.invoke()
+        self.assertEqual(self.app.backend.snapshot(), (False, False))
+        self.assertEqual(self.saving.call_count, 1)
+
+    def test_invalid_shortcut_never_locks(self):
+        self.app.shortcut.set("q")
+        with patch("main.messagebox.showerror") as error:
+            self.app.mouse_button.invoke()
+        error.assert_called_once()
         self.assertIsNone(self.app.backend)
-        self.assertEqual(self.app.status.cget("text"), "Selecione teclado ou mouse")
-
-    def test_selection_frozen_during_countdown(self):
-        self.app.delay.set("3 segundos")
-        self.app.start()
-        self.app.mouse.switch.invoke()
-        self.assertTrue(self.app.mouse.selected)
 
     def test_about_displays_credits(self):
         self.app.about()

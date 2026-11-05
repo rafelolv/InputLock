@@ -1,7 +1,5 @@
 import os
-import time
 import unittest
-from unittest.mock import patch
 
 from core import LockState, WindowsInputLock, normalize_shortcut, parse_shortcut
 
@@ -73,21 +71,6 @@ class LockTests(unittest.TestCase):
         self.press(0xA4, ord("2"))
         self.assertFalse(self.state.keyboard_locked)
 
-    def test_timer_expires_without_ui(self):
-        with patch("core.time.monotonic", return_value=100):
-            self.state.lock(True, True, seconds=30)
-        with patch("core.time.monotonic", return_value=129):
-            self.state.expire()
-            self.assertEqual(self.state.snapshot(), (True, True, 1))
-        with patch("core.time.monotonic", return_value=130):
-            self.state.expire()
-            self.assertEqual(self.state.snapshot(), (False, False, None))
-
-    def test_no_limit_does_not_expire(self):
-        self.state.lock(True, True)
-        self.state.expire()
-        self.assertEqual(self.state.snapshot(), (True, True, None))
-
     def test_invalid_shortcut_never_locks(self):
         with self.assertRaises(ValueError):
             self.state.lock(True, True, "bad")
@@ -101,7 +84,7 @@ class LockTests(unittest.TestCase):
         backend = WindowsInputLock()
         try:
             self.assertTrue(backend._thread.is_alive())
-            self.assertEqual(backend.snapshot(), (False, False, None))
+            self.assertEqual(backend.snapshot(), (False, False))
         finally:
             backend.close()
         self.assertFalse(backend._thread.is_alive())

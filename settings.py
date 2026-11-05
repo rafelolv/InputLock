@@ -6,9 +6,7 @@ from pathlib import Path
 
 from core import normalize_shortcut
 
-DEFAULTS = {"shortcut": "ctrl+q", "duration": 60, "delay": 3}
-DURATIONS = {"Sem limite": 0, "30 segundos": 30, "1 minuto": 60,
-             "5 minutos": 300, "15 minutos": 900}
+DEFAULTS = {"shortcut": "ctrl+q"}
 
 
 def config_path():
@@ -22,10 +20,6 @@ def load_config(path=None):
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         config["shortcut"] = normalize_shortcut(data.get("shortcut", DEFAULTS["shortcut"]))
-        if type(data.get("duration")) is int and data["duration"] in DURATIONS.values():
-            config["duration"] = data["duration"]
-        if type(data.get("delay")) is int and data["delay"] in (0, 3, 5):
-            config["delay"] = data["delay"]
     except (OSError, ValueError, TypeError, AttributeError):
         pass
     return config
@@ -33,10 +27,7 @@ def load_config(path=None):
 
 def save_config(config, path=None):
     path = Path(path) if path else config_path()
-    data = {"shortcut": normalize_shortcut(config["shortcut"]),
-            "duration": config["duration"], "delay": config["delay"]}
-    if data["duration"] not in DURATIONS.values() or data["delay"] not in (0, 3, 5):
-        raise ValueError("Tempo inválido.")
+    data = {"shortcut": normalize_shortcut(config["shortcut"])}
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".tmp")
     temporary.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
