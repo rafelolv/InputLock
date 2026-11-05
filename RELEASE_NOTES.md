@@ -1,4 +1,4 @@
-InputLock v1.0.3 — instalador.
+InputLock v1.0.4 — instalador.
 
 - Versão instalada com dependências já extraídas, evitando extração a cada abertura.
 - Instalador com identidade do InputLock e tema claro/escuro conforme o Windows.

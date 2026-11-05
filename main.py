@@ -16,7 +16,7 @@ from PIL import Image
 from core import LockState, WindowsInputLock, normalize_shortcut
 from settings import load_config, save_config
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 GITHUB = "https://github.com/rafelolv"
 SOURCE = GITHUB + "/InputLock"
 BG = "#f5f5f7"

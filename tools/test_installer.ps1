@@ -27,6 +27,22 @@ function Wait-ForRemoval([string[]] $Paths) {
     throw "Uninstall left application files behind: $($remaining -join ', ')"
 }
 
+$uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{941F422E-40A8-4C04-86ED-91355C9FBEA4}_is1'
+if (Test-Path -LiteralPath $uninstallKey) { throw 'Refusing to overwrite a pre-existing InputLock installation' }
+
+function Get-Uninstaller {
+    $deadline = [DateTime]::UtcNow.AddSeconds(10)
+    do {
+        $entry = Get-ItemProperty -LiteralPath $uninstallKey -ErrorAction SilentlyContinue
+        if ($entry -and $entry.UninstallString) {
+            $path = $entry.UninstallString.Trim('"')
+            if (Test-Path -LiteralPath $path) { return $path }
+        }
+        Start-Sleep -Milliseconds 200
+    } while ([DateTime]::UtcNow -lt $deadline)
+    throw 'Registered uninstaller was not found'
+}
+
 $testRoot = Join-Path $env:RUNNER_TEMP 'InputLock-InstallerTest'
 $installRoot = Join-Path $testRoot 'Installed App'
 $roaming = Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'InputLock'
@@ -55,17 +71,19 @@ New-Item -ItemType Directory -Path $roaming, $local, "$testRoot\Outside" | Out-N
 'outside the app folders' | Set-Content "$testRoot\Outside\keep.txt"
 New-Item -ItemType Junction -Path "$roaming\external-link" -Target "$testRoot\Outside" | Out-Null
 
-$uninstaller = Join-Path $installRoot 'unins000.exe'
+$uninstaller = Get-Uninstaller
 $keepTime = Run-Checked $uninstaller ($uninstallArguments + "/LOG=`"$testRoot\uninstall-keep.log`"")
 # Inno may move the uninstaller into a child process. Wait for its managed files to disappear.
-Wait-ForRemoval @($installedExe, $internal)
+Wait-ForRemoval @($installedExe, $internal, $uninstaller)
 foreach ($path in @("$roaming\settings.json", "$local\cache.bin", "$installRoot\user-note.txt", "$testRoot\Outside\keep.txt")) {
     if (-not (Test-Path -LiteralPath $path)) { throw "Keep-data uninstall removed: $path" }
 }
 
 Run-Checked $installer $installArguments | Out-Null
+$uninstaller = Get-Uninstaller
 $purgeTime = Run-Checked $uninstaller ($uninstallArguments + @('/PURGEDATA=1', "/LOG=`"$testRoot\uninstall-purge.log`""))
-Wait-ForRemoval @($installedExe, $internal, $roaming, $local)
+Wait-ForRemoval @($installedExe, $internal, $uninstaller, $roaming, $local)
+if (Test-Path -LiteralPath $uninstallKey) { throw 'Uninstall registration was not removed' }
 foreach ($path in @("$installRoot\user-note.txt", "$testRoot\Outside\keep.txt")) {
     if (-not (Test-Path -LiteralPath $path)) { throw "Purge deleted unrelated data: $path" }
 }

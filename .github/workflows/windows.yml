@@ -13,25 +13,6 @@ permissions:
   contents: read
 
 jobs:
-  previous-installer-diagnostics:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-    steps:
-      - name: Read failed installer lifecycle log
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api repos/rafelolv/InputLock/actions/jobs/127312701957/logs > previous-build.log
-          python3 - <<'PYLOG'
-          from pathlib import Path
-          lines = Path('previous-build.log').read_text().splitlines()
-          errors = [line for line in lines if any(text in line for text in (
-              'Exception:', 'throw ', 'Exit ', 'removed:', 'deleted ', 'behind:', 'Refusing', 'missing', 'was not'))]
-          for line in errors[-15:]:
-              print('::notice title=Previous installer failure::' + line.replace('%', '%25'))
-          PYLOG
   build:
     runs-on: windows-latest
     steps:
