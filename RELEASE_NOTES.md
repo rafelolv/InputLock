@@ -1,10 +1,8 @@
-InputLock v1.0.5 — cores e apresentação.
+InputLock v1.0.6 — licença MIT.
 
-- Azul mais vivo nos botões, ícones e marca.
-- Verde para dispositivos livres e laranja para bloqueados.
-- Mais contraste nos textos e no estado dos botões.
-- Layout compacto e controles diretos mantidos.
-- Textos de apresentação e metadados revisados.
+- Licença do projeto alterada para MIT.
+- Copyright: 2026 rafaelolv.
+- Licença atualizada na interface, nos metadados e no instalador.
 
 ### Downloads
 
@@ -15,4 +13,4 @@ InputLock v1.0.5 — cores e apresentação.
 
 Windows 10/11 x64. Não precisa instalar Python.
 
-made by [rafaelolv](https://github.com/rafelolv). Licença AGPL-3.0.
+made by [rafaelolv](https://github.com/rafelolv). Licença MIT.

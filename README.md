@@ -83,3 +83,5 @@ Antes da primeira release, confira em um Windows real: teclado isolado, mouse is
 ## Créditos e licença
 
 **made by rafaelolv** · [GitHub](https://github.com/rafelolv)
+
+[Licença MIT](LICENSE) · Copyright (c) 2026 rafaelolv.

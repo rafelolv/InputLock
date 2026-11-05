@@ -16,7 +16,7 @@ from PIL import Image
 from core import LockState, WindowsInputLock, normalize_shortcut
 from settings import load_config, save_config
 
-VERSION = "1.0.5"
+VERSION = "1.0.6"
 GITHUB = "https://github.com/rafelolv"
 SOURCE = GITHUB + "/InputLock"
 BG = "#f7f9fc"
@@ -209,10 +209,10 @@ class InputLockApp:
         window.transient(self.root)
         self.label(window, f"InputLock {VERSION}", 21, bold=True).pack(anchor="w")
         self.label(window, "made by rafaelolv", 13, MUTED).pack(anchor="w", pady=(6, 16))
-        self.label(window, "Bloqueio temporário de teclado e mouse.\n\nLicença AGPL-3.0. Sem garantia.\nVocê pode modificar e redistribuir sob essa licença.\n\nBloqueia entradas na sessão atual do Windows.\nNão substitui o bloqueio de sessão (Win + L).\nCtrl + Alt + Del continua disponível.",
+        self.label(window, "Bloqueio temporário de teclado e mouse.\n\nLicença MIT. Sem garantia.\nVocê pode modificar e redistribuir sob essa licença.\n\nBloqueia entradas na sessão atual do Windows.\nNão substitui o bloqueio de sessão (Win + L).\nCtrl + Alt + Del continua disponível.",
                    12, MUTED, justify="left").pack(anchor="w")
         for title, url in (("Código-fonte ↗", SOURCE),
-                           ("Licença AGPL-3.0 ↗", SOURCE + "/blob/main/LICENSE")):
+                           ("Licença MIT ↗", SOURCE + "/blob/main/LICENSE")):
             link = self.label(window, title, 12, TEXT, cursor="hand2")
             link.pack(anchor="w", pady=(12, 0))
             link.bind("<Button-1>", lambda event, target=url: webbrowser.open(target))

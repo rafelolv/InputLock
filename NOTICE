@@ -1,9 +1,6 @@
 InputLock
+Copyright (c) 2026 rafaelolv
 https://github.com/rafelolv/InputLock
 
-Modified by rafaelolv, 2026-11-05:
-InputLock interface, branding and icon; Windows input hooks;
-validated per-user preferences; direct device controls; Windows build and release pipeline.
-
-InputLock is distributed under GNU AGPL version 3. See LICENSE.
+Licensed under the MIT License. See LICENSE.
 This software is provided without warranty.

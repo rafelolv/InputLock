@@ -1,5 +1,5 @@
 ﻿#define AppName "InputLock"
-#define Version "1.0.5"
+#define Version "1.0.6"
 #define Author "rafaelolv"
 #define URL "https://github.com/rafelolv/InputLock"
 #define ExeName "InputLock.exe"
