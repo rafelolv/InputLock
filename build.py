@@ -18,6 +18,7 @@ def build_command(mode):
         "--icon=assets/icon.ico", "--add-data=assets/icon.png:assets",
         "--add-data=assets/icon.ico:assets", "--add-data=assets/keyboard.png:assets",
         "--add-data=assets/mouse.png:assets",
+        "--add-data=assets/keyboard_active.png:assets", "--add-data=assets/mouse_active.png:assets",
         "--collect-data=customtkinter", "--copy-metadata=customtkinter",
         "--copy-metadata=Pillow", "--copy-metadata=darkdetect", "--copy-metadata=packaging", "--add-data=LICENSE:.", "--add-data=NOTICE:.",
         "--version-file=version_info.txt", "main.py",

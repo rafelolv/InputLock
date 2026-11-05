@@ -16,14 +16,18 @@ from PIL import Image
 from core import LockState, WindowsInputLock, normalize_shortcut
 from settings import load_config, save_config
 
-VERSION = "1.0.4"
+VERSION = "1.0.5"
 GITHUB = "https://github.com/rafelolv"
 SOURCE = GITHUB + "/InputLock"
-BG = "#f5f5f7"
+BG = "#f7f9fc"
 CARD = "#ffffff"
-BORDER = "#dfe2e7"
-TEXT = "#20242b"
-MUTED = "#747b85"
+BORDER = "#b9c7de"
+TEXT = "#14213a"
+MUTED = "#58657a"
+ACCENT = "#1764ff"
+ACCENT_HOVER = "#004bd6"
+FREE = "#07864b"
+LOCKED = "#bd4a00"
 FONT = "Segoe UI"
 
 
@@ -56,7 +60,8 @@ class InputLockApp:
         if os.name == "nt":
             root.iconbitmap(str(asset("icon.ico")))
         self.images = {}
-        for name, size in (("icon", 24), ("keyboard", 20), ("mouse", 20)):
+        for name, size in (("icon", 24), ("keyboard", 20), ("mouse", 20),
+                           ("keyboard_active", 20), ("mouse_active", 20)):
             with Image.open(asset(f"{name}.png")) as source:
                 self.images[name] = ctk.CTkImage(light_image=source.copy(), size=(size, size))
         self._build()
@@ -81,17 +86,17 @@ class InputLockApp:
 
         status = tk.Frame(body, bg=BG)
         status.pack(fill="x", pady=(16, 14))
-        self.keyboard_status = self.label(status, "●  Teclado livre", 11, MUTED)
+        self.keyboard_status = self.label(status, "●  Teclado livre", 11, FREE)
         self.keyboard_status.pack(side="left")
-        self.mouse_status = self.label(status, "●  Mouse livre", 11, MUTED)
+        self.mouse_status = self.label(status, "●  Mouse livre", 11, FREE)
         self.mouse_status.pack(side="right")
 
         buttons = tk.Frame(body, bg=BG)
         buttons.pack(fill="x")
         buttons.columnconfigure((0, 1), weight=1, uniform="device")
         options = dict(height=48, corner_radius=8, border_width=1,
-                       border_color=BORDER, fg_color=CARD, hover_color="#e9ecf0",
-                       text_color=TEXT, font=ui_font(13))
+                       border_color=ACCENT, fg_color=CARD, hover_color="#e9f0ff",
+                       text_color=ACCENT, font=ui_font(13))
         self.keyboard_button = ctk.CTkButton(buttons, text="Teclado", image=self.images["keyboard"],
                                              command=lambda: self.toggle_device("keyboard"), **options)
         self.keyboard_button.grid(row=0, column=0, sticky="ew", padx=(0, 5))
@@ -99,8 +104,8 @@ class InputLockApp:
                                           command=lambda: self.toggle_device("mouse"), **options)
         self.mouse_button.grid(row=0, column=1, sticky="ew", padx=(5, 0))
         self.both_button = ctk.CTkButton(body, text="Bloquear ambos", command=self.toggle_both,
-                                         height=40, corner_radius=8, fg_color=TEXT,
-                                         hover_color="#363d48", text_color=CARD, font=ui_font(13))
+                                         height=40, corner_radius=8, fg_color=ACCENT,
+                                         hover_color=ACCENT_HOVER, text_color=CARD, font=ui_font(13))
         self.both_button.pack(fill="x", pady=(10, 0))
 
         row = tk.Frame(body, bg=BG)
@@ -118,11 +123,11 @@ class InputLockApp:
         footer = tk.Frame(body, bg=BG)
         footer.pack(fill="x", pady=(16, 0))
         for title, url, side in (("made by rafaelolv", GITHUB, "left"), ("GitHub ↗", SOURCE, "right")):
-            link = self.label(footer, title, 10, MUTED, cursor="hand2")
+            link = self.label(footer, title, 10, ACCENT, cursor="hand2")
             link.pack(side=side)
             link.bind("<Button-1>", lambda event, target=url: webbrowser.open(target))
-            link.bind("<Enter>", lambda event, widget=link: widget.configure(text_color=TEXT))
-            link.bind("<Leave>", lambda event, widget=link: widget.configure(text_color=MUTED))
+            link.bind("<Enter>", lambda event, widget=link: widget.configure(text_color=ACCENT_HOVER))
+            link.bind("<Leave>", lambda event, widget=link: widget.configure(text_color=ACCENT))
         if not self.preview and os.name != "nt":
             for button in (self.keyboard_button, self.mouse_button, self.both_button):
                 button.configure(state="disabled")
@@ -177,14 +182,16 @@ class InputLockApp:
             return
         self._render_state = state
         keyboard, mouse = state
-        for locked, label, button, name in (
-            (keyboard, self.keyboard_status, self.keyboard_button, "Teclado"),
-            (mouse, self.mouse_status, self.mouse_button, "Mouse"),
+        for locked, label, button, name, kind in (
+            (keyboard, self.keyboard_status, self.keyboard_button, "Teclado", "keyboard"),
+            (mouse, self.mouse_status, self.mouse_button, "Mouse", "mouse"),
         ):
             label.configure(text=f"●  {name} {'bloqueado' if locked else 'livre'}",
-                            text_color="#a3692d" if locked else MUTED)
-            button.configure(fg_color="#e4e8ee" if locked else CARD,
-                             border_color="#bdc5d0" if locked else BORDER)
+                            text_color=LOCKED if locked else FREE)
+            button.configure(fg_color=ACCENT if locked else CARD, border_color=ACCENT,
+                             text_color=CARD if locked else ACCENT,
+                             hover_color=ACCENT_HOVER if locked else "#e9f0ff",
+                             image=self.images[f"{kind}_active" if locked else kind])
         self.both_button.configure(text="Desbloquear ambos" if keyboard and mouse else "Bloquear ambos")
         self.shortcut_entry.configure(state="disabled" if keyboard or mouse else "normal")
 
@@ -202,9 +209,9 @@ class InputLockApp:
         window.transient(self.root)
         self.label(window, f"InputLock {VERSION}", 21, bold=True).pack(anchor="w")
         self.label(window, "made by rafaelolv", 13, MUTED).pack(anchor="w", pady=(6, 16))
-        self.label(window, "Bloqueio temporário de teclado e mouse.\n\nBase: Keylock, de Axorax.\nModificado por rafaelolv em novembro de 2026.\nLicença AGPL-3.0. Sem garantia.\nVocê pode modificar e redistribuir sob essa licença.\n\nBloqueia entradas na sessão atual do Windows.\nNão substitui o bloqueio de sessão (Win + L).\nCtrl + Alt + Del continua disponível.",
+        self.label(window, "Bloqueio temporário de teclado e mouse.\n\nLicença AGPL-3.0. Sem garantia.\nVocê pode modificar e redistribuir sob essa licença.\n\nBloqueia entradas na sessão atual do Windows.\nNão substitui o bloqueio de sessão (Win + L).\nCtrl + Alt + Del continua disponível.",
                    12, MUTED, justify="left").pack(anchor="w")
-        for title, url in (("Código-fonte ↗", SOURCE), ("Projeto original ↗", "https://github.com/Axorax/keylock"),
+        for title, url in (("Código-fonte ↗", SOURCE),
                            ("Licença AGPL-3.0 ↗", SOURCE + "/blob/main/LICENSE")):
             link = self.label(window, title, 12, TEXT, cursor="hand2")
             link.pack(anchor="w", pady=(12, 0))
