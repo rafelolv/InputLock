@@ -1,8 +1,9 @@
-InputLock v1.0.6 — licença MIT.
+InputLock v1.0.7 — nova paleta.
 
-- Licença do projeto alterada para MIT.
-- Copyright: 2026 rafaelolv.
-- Licença atualizada na interface, nos metadados e no instalador.
+- Fundo ameixa, ação principal em coral e botões ativos em lima.
+- Ícones, links e indicadores ajustados à nova paleta.
+- Marca e instalador com as mesmas cores.
+- Layout compacto de 360 × 320 e os três botões diretos mantidos.
 
 ### Downloads
 

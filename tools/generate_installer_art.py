@@ -14,13 +14,13 @@ def font(size, bold=False):
 
 def main():
     icon = Image.open(ROOT / "assets/icon.png").convert("RGBA")
-    sidebar = Image.new("RGB", (164 * SCALE, 314 * SCALE), "#20242b")
+    sidebar = Image.new("RGB", (164 * SCALE, 314 * SCALE), "#211a2b")
     mark = icon.resize((66 * SCALE, 66 * SCALE), Image.Resampling.LANCZOS)
     sidebar.paste(mark, (18 * SCALE, 28 * SCALE), mark)
     pen = ImageDraw.Draw(sidebar)
-    pen.text((23 * SCALE, 106 * SCALE), "InputLock", font=font(20, True), fill="#ffffff")
-    pen.text((23 * SCALE, 274 * SCALE), "made by", font=font(9), fill="#b6bec9")
-    pen.text((23 * SCALE, 289 * SCALE), "rafaelolv", font=font(10), fill="#ffffff")
+    pen.text((23 * SCALE, 106 * SCALE), "InputLock", font=font(20, True), fill="#fff3e5")
+    pen.text((23 * SCALE, 274 * SCALE), "made by", font=font(9), fill="#c8b2cf")
+    pen.text((23 * SCALE, 289 * SCALE), "rafaelolv", font=font(10), fill="#fff3e5")
     sidebar.save(ROOT / "assets/installer-sidebar.png")
     header = Image.new("RGBA", (64 * SCALE, 64 * SCALE))
     mark = icon.resize((48 * SCALE, 48 * SCALE), Image.Resampling.LANCZOS)

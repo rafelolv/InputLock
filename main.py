@@ -16,18 +16,18 @@ from PIL import Image
 from core import LockState, WindowsInputLock, normalize_shortcut
 from settings import load_config, save_config
 
-VERSION = "1.0.6"
+VERSION = "1.0.7"
 GITHUB = "https://github.com/rafelolv"
 SOURCE = GITHUB + "/InputLock"
-BG = "#f7f9fc"
-CARD = "#ffffff"
-BORDER = "#b9c7de"
-TEXT = "#14213a"
-MUTED = "#58657a"
-ACCENT = "#1764ff"
-ACCENT_HOVER = "#004bd6"
-FREE = "#07864b"
-LOCKED = "#bd4a00"
+BG = "#211a2b"
+CARD = "#30253d"
+BORDER = "#806b8c"
+TEXT = "#fff3e5"
+MUTED = "#c8b2cf"
+ACCENT = "#ff865e"
+ACCENT_HOVER = "#ffa17f"
+FREE = "#c6f178"
+LOCKED = "#ff9f82"
 FONT = "Segoe UI"
 
 
@@ -47,7 +47,7 @@ class InputLockApp:
         self.backend = None
         self._render_state = None
         self.config = load_config()
-        ctk.set_appearance_mode("light")
+        ctk.set_appearance_mode("dark")
         families = tkfont.families(root)
         FONT = next((name for name in ("Segoe UI", "Inter", "DejaVu Sans") if name in families), "Arial")
         root.title("InputLock · Prévia" if preview else "InputLock")
@@ -68,6 +68,30 @@ class InputLockApp:
         root.update_idletasks()
         root.geometry(f"{max(360, root.winfo_reqwidth())}x{root.winfo_reqheight()}")
         self.poll_job = root.after(100, self._poll)
+        root.after_idle(self._style_titlebar)
+
+    def _style_titlebar(self):
+        if os.name != "nt":
+            return
+        try:
+            user = ctypes.WinDLL("user32", use_last_error=True)
+            user.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+            user.GetAncestor.restype = wintypes.HWND
+            handle = user.GetAncestor(self.root.winfo_id(), 2)
+            dwm = ctypes.WinDLL("dwmapi")
+            dwm.DwmSetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD,
+                                                ctypes.c_void_p, wintypes.DWORD]
+            dwm.DwmSetWindowAttribute.restype = ctypes.c_long
+            for attribute, color in ((20, None), (35, BG), (36, TEXT)):
+                if color is None:
+                    value = ctypes.c_uint(1)
+                else:
+                    red, green, blue = bytes.fromhex(color[1:])
+                    value = ctypes.c_uint(red | (green << 8) | (blue << 16))
+                # Older Windows versions may decline unsupported caption colors.
+                dwm.DwmSetWindowAttribute(handle, attribute, ctypes.byref(value), ctypes.sizeof(value))
+        except (OSError, AttributeError):
+            pass
 
     def label(self, parent, text, size=12, color=TEXT, bold=False, **kwargs):
         return ctk.CTkLabel(parent, text=text, text_color=color, height=20,
@@ -81,7 +105,7 @@ class InputLockApp:
         self.label(header, "", image=self.images["icon"], width=24).pack(side="left", padx=(0, 8))
         self.label(header, "InputLock", 16, bold=True).pack(side="left")
         ctk.CTkButton(header, text="···", width=24, height=24, corner_radius=6,
-                      font=ui_font(18, True), fg_color="transparent", hover_color="#e9ebef",
+                      font=ui_font(18, True), fg_color="transparent", hover_color="#453250",
                       text_color=MUTED, command=self.about).pack(side="right")
 
         status = tk.Frame(body, bg=BG)
@@ -95,8 +119,8 @@ class InputLockApp:
         buttons.pack(fill="x")
         buttons.columnconfigure((0, 1), weight=1, uniform="device")
         options = dict(height=48, corner_radius=8, border_width=1,
-                       border_color=ACCENT, fg_color=CARD, hover_color="#e9f0ff",
-                       text_color=ACCENT, font=ui_font(13))
+                       border_color=BORDER, fg_color=CARD, hover_color="#453250",
+                       text_color=TEXT, font=ui_font(13))
         self.keyboard_button = ctk.CTkButton(buttons, text="Teclado", image=self.images["keyboard"],
                                              command=lambda: self.toggle_device("keyboard"), **options)
         self.keyboard_button.grid(row=0, column=0, sticky="ew", padx=(0, 5))
@@ -105,7 +129,7 @@ class InputLockApp:
         self.mouse_button.grid(row=0, column=1, sticky="ew", padx=(5, 0))
         self.both_button = ctk.CTkButton(body, text="Bloquear ambos", command=self.toggle_both,
                                          height=40, corner_radius=8, fg_color=ACCENT,
-                                         hover_color=ACCENT_HOVER, text_color=CARD, font=ui_font(13))
+                                         hover_color=ACCENT_HOVER, text_color=BG, font=ui_font(13))
         self.both_button.pack(fill="x", pady=(10, 0))
 
         row = tk.Frame(body, bg=BG)
@@ -114,7 +138,8 @@ class InputLockApp:
         self.shortcut = tk.StringVar(value=self.config["shortcut"])
         self.shortcut_entry = ctk.CTkEntry(row, textvariable=self.shortcut, width=140, height=30,
                                           corner_radius=6, border_width=1, border_color=BORDER,
-                                          fg_color=CARD, text_color=TEXT, font=ui_font(12), justify="center")
+                                          fg_color=CARD, text_color=TEXT,
+                                          font=ui_font(12), justify="center")
         self.shortcut_entry.pack(side="right")
         self.shortcut_entry.bind("<Return>", lambda event: self.save_preferences())
         self.hint = self.label(body, "Emergência: Ctrl + Alt + F12", 10, MUTED)
@@ -188,11 +213,15 @@ class InputLockApp:
         ):
             label.configure(text=f"●  {name} {'bloqueado' if locked else 'livre'}",
                             text_color=LOCKED if locked else FREE)
-            button.configure(fg_color=ACCENT if locked else CARD, border_color=ACCENT,
-                             text_color=CARD if locked else ACCENT,
-                             hover_color=ACCENT_HOVER if locked else "#e9f0ff",
+            button.configure(fg_color=FREE if locked else CARD,
+                             border_color=FREE if locked else BORDER,
+                             text_color=BG if locked else TEXT,
+                             hover_color="#d7ff94" if locked else "#453250",
                              image=self.images[f"{kind}_active" if locked else kind])
-        self.both_button.configure(text="Desbloquear ambos" if keyboard and mouse else "Bloquear ambos")
+        both_locked = keyboard and mouse
+        self.both_button.configure(text="Desbloquear ambos" if both_locked else "Bloquear ambos",
+                                   fg_color=FREE if both_locked else ACCENT,
+                                   hover_color="#d7ff94" if both_locked else ACCENT_HOVER)
         self.shortcut_entry.configure(state="disabled" if keyboard or mouse else "normal")
 
     def _poll(self):

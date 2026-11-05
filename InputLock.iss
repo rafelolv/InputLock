@@ -1,5 +1,5 @@
 ﻿#define AppName "InputLock"
-#define Version "1.0.6"
+#define Version "1.0.7"
 #define Author "rafaelolv"
 #define URL "https://github.com/rafelolv/InputLock"
 #define ExeName "InputLock.exe"
@@ -27,15 +27,15 @@ LicenseFile=LICENSE
 Compression=lzma2/normal
 SolidCompression=yes
 WizardStyle=modern dynamic windows11 includetitlebar
-WizardBackColor=#f5f5f7
-WizardBackColorDynamicDark=#20242b
+WizardBackColor=#fff9f2
+WizardBackColorDynamicDark=#211a2b
 WizardImageFile=assets\installer-sidebar.png
 WizardImageFileDynamicDark=assets\installer-sidebar.png
 WizardSmallImageFile=assets\installer-header.png
 WizardSmallImageFileDynamicDark=assets\installer-header.png
 WizardImageStretch=yes
-WizardImageBackColor=#20242b
-WizardImageBackColorDynamicDark=#20242b
+WizardImageBackColor=#211a2b
+WizardImageBackColorDynamicDark=#211a2b
 ShowLanguageDialog=auto
 CloseApplications=yes
 CloseApplicationsFilter=InputLock.exe
