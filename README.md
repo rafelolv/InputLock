@@ -17,7 +17,13 @@ Baixe `InputLock.exe` na release e abra. Não precisa instalar Python.
 
 O atalho padrão `Ctrl + Q` libera tudo, inclusive com o mouse bloqueado. Você pode alterar o atalho no campo **Desbloquear**. A emergência `Ctrl + Alt + F12` permanece fixa.
 
-Preferências em `%APPDATA%\InputLock\settings.json`. Sem contas, telemetria ou registro de teclas. `InputLock-Setup.exe` é o instalador opcional por usuário.
+Preferências em `%APPDATA%\InputLock\settings.json`. Sem contas, telemetria ou registro de teclas. `InputLock-Setup.exe` é o instalador opcional por usuário. A versão instalada já contém as dependências extraídas, evitando extraí-las novamente a cada abertura.
+
+## Instalar e desinstalar
+
+O instalador acompanha o tema claro ou escuro do Windows e não exige administrador. Atualizações usam a mesma instalação.
+
+Ao desinstalar, há a opção **Apagar também configurações e dados locais**, desmarcada por padrão. Marcando-a, o desinstalador remove `%APPDATA%\InputLock` e `%LOCALAPPDATA%\InputLock`. Sem marcar, mantém essas preferências para uma reinstalação. Os arquivos instalados são removidos em ambos os casos.
 
 O app atua na sessão atual do Windows 10/11 x64. Para bloquear a sessão, use `Win + L`. `Ctrl + Alt + Del` permanece disponível. Aplicativos elevados e áreas protegidas do Windows podem não ser bloqueados. Fechar o app libera os dispositivos.
 
@@ -44,7 +50,7 @@ py -3 -m pip install -r requirements-build.txt
 py -3 build.py
 ```
 
-Ou execute `build.bat`. Resultado: `dist/InputLock.exe`, portátil, com ícone e metadados. Para o instalador, compile `InputLock.iss` com Inno Setup 6:
+Ou execute `build.bat`. A compilação gera `dist/InputLock.exe` (portátil) e `dist/InputLock/` (aplicação e dependências para instalação). Para o instalador, compile `InputLock.iss` com Inno Setup 6.7 ou superior:
 
 ```powershell
 & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" InputLock.iss
@@ -70,12 +76,10 @@ python3 -m unittest discover -s tests -v
 python3 main.py --smoke-test
 ```
 
-Testes cobrem os três botões, atalhos, modificadores dos dois lados, desbloqueio de emergência e preferências inválidas. No Windows, também iniciam e encerram os hooks sem bloquear entradas. O smoke test abre uma prévia e encerra automaticamente. A pipeline também executa o smoke test do `.exe` empacotado.
+Testes cobrem os três botões, atalhos, modificadores dos dois lados, desbloqueio de emergência e preferências inválidas. No Windows, também iniciam e encerram os hooks sem bloquear entradas. O smoke test abre uma prévia e encerra automaticamente. A pipeline também instala o programa no Windows, abre as versões instalada e portátil e testa desinstalação mantendo ou apagando as preferências. Verifica que arquivos alheios e destinos de junctions sejam preservados. Os tempos ficam no resumo do build.
 
 Antes da primeira release, confira em um Windows real: teclado isolado, mouse isolado, ambos, atalhos personalizados e emergência. Os testes automatizados não simulam a supressão de entradas reais.
 
 ## Créditos e licença
 
 **made by rafaelolv** · [GitHub](https://github.com/rafelolv)
-
-Baseado no [Keylock, de Axorax](https://github.com/Axorax/keylock), modificado por rafaelolv. Licença [AGPL-3.0](LICENSE). Créditos e alterações em [NOTICE](NOTICE). Sem garantia.
