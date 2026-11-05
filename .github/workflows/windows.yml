@@ -31,8 +31,14 @@ jobs:
       - name: Build installer
         shell: pwsh
         run: |
-          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" InputLock.iss
-          if ($LASTEXITCODE -ne 0) { throw 'Installer build failed' }
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          $process = Start-Process -FilePath $compiler -ArgumentList 'InputLock.iss' -Wait -PassThru `
+            -RedirectStandardOutput build/inno-stdout.log -RedirectStandardError build/inno-stderr.log
+          Get-Content build/inno-stdout.log
+          if ($process.ExitCode -ne 0) {
+            Get-Content build/inno-stderr.log | ForEach-Object { Write-Output "::error::$_" }
+            throw 'Installer build failed; see compiler diagnostics'
+          }
       - name: Test install, startup and both uninstall options
         shell: pwsh
         run: ./tools/test_installer.ps1
@@ -41,7 +47,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: InputLock-Installer-Logs
-          path: ${{ runner.temp }}/InputLock-InstallerTest/*.log
+          path: |
+            ${{ runner.temp }}/InputLock-InstallerTest/*.log
+            build/inno-*.log
           if-no-files-found: ignore
       - name: Package corresponding source and checksums
         shell: pwsh
