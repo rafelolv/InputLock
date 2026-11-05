@@ -88,11 +88,9 @@ var
   ContinueButton: TNewButton;
 begin
   Result := False;
-  Dialog := CreateCustomForm;
+  Dialog := CreateCustomForm(460, 300, True, True);
   try
     Dialog.Caption := CustomMessage('CleanupTitle');
-    Dialog.ClientWidth := ScaleX(460);
-    Dialog.ClientHeight := ScaleY(270);
     Dialog.Position := poScreenCenter;
 
     Heading := TNewStaticText.Create(Dialog);
@@ -127,14 +125,14 @@ begin
     Paths.WordWrap := True;
     Paths.Caption := ExpandConstant('{userappdata}\InputLock') + #13#10 +
       ExpandConstant('{localappdata}\InputLock');
-    Paths.SetBounds(ScaleX(24), ScaleY(174), ScaleX(412), ScaleY(40));
+    Paths.SetBounds(ScaleX(24), ScaleY(174), ScaleX(412), ScaleY(56));
 
     ContinueButton := TNewButton.Create(Dialog);
     ContinueButton.Parent := Dialog;
     ContinueButton.Caption := CustomMessage('CleanupContinue');
     ContinueButton.Default := True;
     ContinueButton.ModalResult := mrOk;
-    ContinueButton.SetBounds(ScaleX(326), ScaleY(226), ScaleX(110), ScaleY(28));
+    ContinueButton.SetBounds(ScaleX(326), ScaleY(254), ScaleX(110), ScaleY(28));
 
     if Dialog.ShowModal = mrOk then
       Result := Checkbox.Checked;
