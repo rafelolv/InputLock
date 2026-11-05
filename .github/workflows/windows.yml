@@ -1,0 +1,84 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-build.txt
+      - name: Install build dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Build and test portable executable
+        run: python build.py
+      - name: Smoke test packaged interface
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath dist/InputLock.exe -ArgumentList '--smoke-test' -PassThru
+          if (-not $process.WaitForExit(30000)) {
+            $process.Kill()
+            throw 'InputLock smoke test timed out'
+          }
+          if ($process.ExitCode -ne 0) { throw 'InputLock failed to start' }
+      - name: Build installer
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" InputLock.iss
+          if ($LASTEXITCODE -ne 0) { throw 'Installer build failed' }
+      - name: Package corresponding source and checksums
+        shell: pwsh
+        run: |
+          git archive --format=zip --output=dist/InputLock-Source.zip HEAD
+          Get-ChildItem dist -File | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)"
+          } | Set-Content -Encoding ascii dist/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: InputLock-Windows-x64
+          path: |
+            dist/InputLock.exe
+            dist/InputLock-Setup.exe
+            dist/InputLock-Source.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+  release:
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: InputLock-Windows-x64
+          path: dist
+      - name: Publish release with binaries and source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" dist/* --clobber
+          else
+            gh release create "$RELEASE_TAG" dist/* --verify-tag \
+              --title "InputLock $RELEASE_TAG" --notes-file RELEASE_NOTES.md
+          fi

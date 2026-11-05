@@ -1,0 +1,13 @@
+InputLock
+https://github.com/rafelolv/InputLock
+
+Based on Keylock by Axorax and contributors:
+https://github.com/Axorax/keylock
+Original project licensed under GNU AGPL version 3.
+
+Modified by rafaelolv, 2026-11-05:
+New InputLock interface, branding and icon; Windows input hooks;
+validated per-user preferences; timed unlocking; Windows build and release pipeline.
+
+InputLock is distributed under GNU AGPL version 3. See LICENSE.
+This software is provided without warranty.

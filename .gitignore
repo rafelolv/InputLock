@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+dist/
+build/
+Output/
+__pycache__/
+*.py[cod]
+*.spec
+*.log
+keylock.toml
+inputlock.json
+.pytest_cache/
+.ruff_cache/
